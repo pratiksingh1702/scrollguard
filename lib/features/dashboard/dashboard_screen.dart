@@ -185,6 +185,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             onPressed: () => context.push('/penalties'),
           ),
           IconButton(
+            icon: const Icon(Icons.verified_user_outlined),
+            tooltip: 'Commitment Contract',
+            onPressed: () => context.push('/contract'),
+          ),
+          IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Settings & Diagnostics',
             onPressed: () => context.push('/settings'),

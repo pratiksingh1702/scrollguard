@@ -6,6 +6,7 @@ import 'package:scrollguard/core/auth/auth_models.dart';
 import 'package:scrollguard/core/models/guard_models.dart';
 import 'package:scrollguard/core/providers/guard_providers.dart';
 import 'package:scrollguard/features/auth/auth_screen.dart';
+import 'package:scrollguard/features/contract/contract_screen.dart';
 import 'package:scrollguard/features/dashboard/dashboard_screen.dart';
 import 'package:scrollguard/features/onboarding/onboarding_screen.dart';
 import 'package:scrollguard/features/penalties/penalties_screen.dart';
@@ -154,10 +155,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/contract',
         name: 'contract',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'Commitment Contract',
-          subtitle: 'Voluntary Stake & Consequence System',
-        ),
+        builder: (context, state) => const ContractScreen(),
       ),
       GoRoute(
         path: '/settings',

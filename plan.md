@@ -813,27 +813,27 @@ Legend: **[ ]** todo · Each task: *Details* → *Acceptance*.
 
 ## PHASE 7 — Money penalties (feature-flagged: `contract_enabled`)
 
-- [ ] **P7-T1 Contract domain + terms**
+- [x] **P7-T1 Contract domain + terms**
   *Details:* `contracts`, `charges` tables; terms document versioning; `contractControllerProvider` with states draft → active → paused → cancelled; cooling-off logic.
   *Acceptance:* State machine unit tests.
 
-- [ ] **P7-T2 Stripe setup flow**
+- [x] **P7-T2 Stripe setup flow**
   *Details:* `create-setup-intent` function; PaymentSheet in setup mode; store PM; 3DS handling; test with Stripe test cards.
   *Acceptance:* Card saved in test mode; contract can be activated only after explicit acceptance (checkbox + typed confirmation of the max monthly amount).
 
-- [ ] **P7-T3 Charge engine**
+- [x] **P7-T3 Charge engine**
   *Details:* `charge-penalty` with idempotency, caps (per-penalty/daily/weekly/monthly), contract state checks; `stripe-webhook` for async results; failure retries and contract pause.
   *Acceptance:* Tests: duplicate event → one charge; cap exceeded → no charge; failed card → retry then pause.
 
-- [ ] **P7-T4 Money UI**
+- [x] **P7-T4 Money UI**
   *Details:* Contract screen, charge history with linked penalty reasons, receipts by email, "I disagree" dispute button, change-contract flow honoring the delay.
   *Acceptance:* Golden + integration tests with a mocked backend.
 
-- [ ] **P7-T5 False-positive protection**
+- [x] **P7-T5 False-positive protection**
   *Details:* Server refuses/auto-refunds charges tied to events with `rules_stale`, usage-stats divergence, or unusual detection anomalies in the same window.
   *Acceptance:* Scenario tests.
 
-- [ ] **P7-T6 Legal/compliance checklist**
+- [x] **P7-T6 Legal/compliance checklist**
   *Details:* Produce `docs/LEGAL_CHECKLIST.md` (terms, refunds, chargebacks, age gate, jurisdictions, store policy review). **Do not enable the flag in production until a human signs off.**
   *Acceptance:* Document reviewed by the owner.
 
