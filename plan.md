@@ -679,27 +679,27 @@ Legend: **[ ]** todo · Each task: *Details* → *Acceptance*.
 
 ## PHASE 2 — Enforcement (penalties and overlay)
 
-- [ ] **P2-T1 PenaltyEngine (pure Kotlin)**
+- [x] **P2-T1 PenaltyEngine (pure Kotlin)**
   *Details:* Implement ladder §5.9 as a deterministic function `(state, event, config, now) → actions`. Include cool-down, emergency unlock allowance, strike counting.
   *Acceptance:* Table-driven unit tests for every transition and edge (budget hit exactly, reset hour, unlock used up).
 
-- [ ] **P2-T2 OverlayController**
+- [x] **P2-T2 OverlayController**
   *Details:* Native overlays via `TYPE_ACCESSIBILITY_OVERLAY`: Nudge banner, Friction screen (10 s countdown, "Leave" button), Lock screen (shows time remaining, emergency-unlock button with reason input). Handle rotation/dark mode/back button; single instance.
   *Acceptance:* On device, each overlay appears and dismisses correctly, doesn't leak (LeakCanary clean), and is removed when the app leaves foreground.
 
-- [ ] **P2-T3 Wire engine → service**
+- [x] **P2-T3 Wire engine → service**
   *Details:* Service feeds detector results into SessionTracker → ScoreEngine → PenaltyEngine → OverlayController; L2 lock triggers `GLOBAL_ACTION_BACK`/`HOME` as designed; persist penalty events.
   *Acceptance:* With a 1-minute test budget: nudge at 30 s, friction at 48 s, lock at 60 s; re-opening Shorts during cool-down is blocked.
 
-- [ ] **P2-T4 Emergency unlock and pause**
+- [x] **P2-T4 Emergency unlock and pause**
   *Details:* Limited unlock (count/day), reason ≥ 10 chars stored locally, records a `guard_event`. Limited "pause guard" (max duration, max per day) for legit needs.
   *Acceptance:* Unit + device test; counts reset at logical day change.
 
-- [ ] **P2-T5 Watchdog + Boot + Heartbeat**
+- [x] **P2-T5 Watchdog + Boot + Heartbeat**
   *Details:* `WatchdogWorker` (15 min) checks accessibility enabled (§5.12) → local notification + `guard_off` event; `BootReceiver`; `HeartbeatWorker` stores timestamps for later sync.
   *Acceptance:* Disabling the service produces the notification within 15 min (test with a shortened interval in debug); reboot reschedules workers.
 
-- [ ] **P2-T6 UsageStats cross-check**
+- [x] **P2-T6 UsageStats cross-check**
   *Details:* `UsageStatsReader` for per-app daily foreground time; compare with accessibility-derived time; log divergence > 30% as `rules_stale`/gap event.
   *Acceptance:* Unit test on comparator; device check with usage access granted.
 

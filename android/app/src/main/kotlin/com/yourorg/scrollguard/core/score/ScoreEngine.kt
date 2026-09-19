@@ -28,6 +28,8 @@ class ScoreEngine(
         todayFeedSeconds = seconds
     }
 
+    fun getTodayFeedSeconds(): Long = todayFeedSeconds
+
     fun addFeedTime(deltaSeconds: Long) {
         val dateNow = computeLogicalDate(clock.wallTimeMs(), config.resetHour)
         if (dateNow != currentLogicalDate) {
