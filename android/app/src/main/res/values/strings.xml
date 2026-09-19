@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="a11y_service_description">ScrollGuard detects when short-form video feeds are active to enforce user-configured budget limits and help prevent compulsive doomscrolling. No messages, video titles, or personal content are ever read or collected.</string>
+</resources>

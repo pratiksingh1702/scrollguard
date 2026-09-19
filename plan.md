@@ -633,43 +633,43 @@ Legend: **[ ]** todo · Each task: *Details* → *Acceptance*.
 
 > Goal: prove that detection works on real devices with real apps. If this fails, the product idea needs rethinking, so validate first.
 
-- [ ] **P1-T1 Minimal AccessibilityService**
+- [x] **P1-T1 Minimal AccessibilityService**
   *Details:* Add the service, XML config (§5.1), manifest entry, `strings.xml` description. Log (debug only, no text content) event type, package, className, and viewId of the source for guarded packages.
   *Acceptance:* After enabling the service in Settings, opening YouTube produces log lines with event types; nothing is logged for non-guarded apps.
 
-- [ ] **P1-T2 Discovery: find feed signals per app**
+- [x] **P1-T2 Discovery: find feed signals per app**
   *Details:* On a physical device, for each app in the §5.2 table: open the short-video feed, use Layout Inspector / `uiautomator dump` / a debug-only "node tree dumper" in the service (IDs + class names only) to identify stable view IDs for (a) feed container present, (b) pager that changes on swipe. Record app version, date, and IDs in `docs/DETECTOR_RULES.md`. Verify the signals are **absent** when the user is on the normal home feed or watching a long video.
   *Acceptance:* `DETECTOR_RULES.md` has, per app: version, IDs, how verified, negative test results. At least YouTube Shorts and Instagram Reels done.
 
-- [ ] **P1-T3 Rules file and parser**
+- [x] **P1-T3 Rules file and parser**
   *Details:* Implement `detector_rules.json` schema (§5.3) in `assets/`, Kotlin `RuleSet` + parser (kotlinx.serialization), validation with helpful errors, unit tests including malformed input.
   *Acceptance:* JVM tests pass; bad JSON falls back to the bundled rules without crashing.
 
-- [ ] **P1-T4 RuleBasedDetector**
+- [x] **P1-T4 RuleBasedDetector**
   *Details:* Implement `FeedDetector` (§5.4) driven by rules: `viewIdPresent`, `contentDescContains` (matches only against a whitelist of strings from rules, never stores them), `wholeAppIsFeed`. Throttle tree queries (§5.5).
   *Acceptance:* On device, entering Shorts sets `inFeed=true` within 1 s and leaving sets it to false within 2 s; unit tests using fake node trees.
 
-- [ ] **P1-T5 SwipeCounter and dwell**
+- [x] **P1-T5 SwipeCounter and dwell**
   *Details:* Implement per §5.6 with configurable `minGapMs`. Unit tests with scripted event timelines (burst of events per swipe → 1 swipe).
   *Acceptance:* Manually scrolling 20 Reels yields 20 ±2 swipes on device; unit tests pass.
 
-- [ ] **P1-T6 BehavioralFallbackDetector**
+- [x] **P1-T6 BehavioralFallbackDetector**
   *Details:* Implement heuristic C (§5.2): guarded app foreground + ≥ N scroll-like events per minute with short intervals. Emits `rules_stale` guard event when it fires while rule-based detector is silent.
   *Acceptance:* With rules deliberately corrupted, scrolling still gets detected as feed-time with lower confidence; stale flag is recorded.
 
-- [ ] **P1-T7 SessionTracker**
+- [x] **P1-T7 SessionTracker**
   *Details:* State machine per §5.7 incl. merge window, screen-off handling, `elapsedRealtime`. In-memory first, then persisted (P1-T8).
   *Acceptance:* Replay-based unit tests: leave for 10 s and return → 1 session; leave for 60 s → 2 sessions; screen off ends session.
 
-- [ ] **P1-T8 Room persistence**
+- [x] **P1-T8 Room persistence**
   *Details:* Room DB per §8.1, DAOs, buffered writes (flush 5 s / on session end), migrations setup, `ConfigStore` with DataStore.
   *Acceptance:* Sessions survive process death; instrumentation test inserts + reads; no per-event disk writes (verify with a counter test).
 
-- [ ] **P1-T9 ScoreEngine + daily budget**
+- [x] **P1-T9 ScoreEngine + daily budget**
   *Details:* Implement §5.8 with logical-day boundary (reset hour). Pure Kotlin.
   *Acceptance:* Unit tests: budget fraction across a 04:00 boundary; intensity monotonic with swipe rate.
 
-- [ ] **P1-T10 Trace recorder + replayer**
+- [x] **P1-T10 Trace recorder + replayer**
   *Details:* Debug-only tool to record anonymized event traces (no text) to JSON, and `TraceReplayer` test utility. Record at least 3 traces per app (normal browsing, doomscroll, long video).
   *Acceptance:* Replay tests assert correct session counts per fixture.
 

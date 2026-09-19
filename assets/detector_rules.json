@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "apps": [
+    {
+      "id": "youtube_shorts",
+      "package": "com.google.android.youtube",
+      "label": "YouTube Shorts",
+      "feedSignals": [
+        {
+          "type": "viewIdPresent",
+          "ids": [
+            "com.google.android.youtube:id/reel_recycler",
+            "com.google.android.youtube:id/reel_player_page_container",
+            "com.google.android.youtube:id/shorts_container"
+          ]
+        }
+      ],
+      "swipeSignals": {
+        "eventTypes": [
+          "TYPE_VIEW_SCROLLED"
+        ],
+        "containerViewIds": [
+          "com.google.android.youtube:id/reel_recycler"
+        ],
+        "minGapMs": 500
+      },
+      "wholeAppIsFeed": false,
+      "minAppVersion": null,
+      "maxAppVersion": null
+    },
+    {
+      "id": "instagram_reels",
+      "package": "com.instagram.android",
+      "label": "Instagram Reels",
+      "feedSignals": [
+        {
+          "type": "viewIdPresent",
+          "ids": [
+            "com.instagram.android:id/clips_viewer_view_pager",
+            "com.instagram.android:id/clips_video_container",
+            "com.instagram.android:id/reel_viewer_root"
+          ]
+        }
+      ],
+      "swipeSignals": {
+        "eventTypes": [
+          "TYPE_VIEW_SCROLLED"
+        ],
+        "containerViewIds": [
+          "com.instagram.android:id/clips_viewer_view_pager"
+        ],
+        "minGapMs": 500
+      },
+      "wholeAppIsFeed": false,
+      "minAppVersion": null,
+      "maxAppVersion": null
+    },
+    {
+      "id": "tiktok_global",
+      "package": "com.zhiliaoapp.musically",
+      "label": "TikTok",
+      "feedSignals": [],
+      "swipeSignals": {
+        "eventTypes": [
+          "TYPE_VIEW_SCROLLED"
+        ],
+        "containerViewIds": [],
+        "minGapMs": 500
+      },
+      "wholeAppIsFeed": true,
+      "minAppVersion": null,
+      "maxAppVersion": null
+    },
+    {
+      "id": "tiktok_regional",
+      "package": "com.ss.android.ugc.trill",
+      "label": "TikTok (Regional)",
+      "feedSignals": [],
+      "swipeSignals": {
+        "eventTypes": [
+          "TYPE_VIEW_SCROLLED"
+        ],
+        "containerViewIds": [],
+        "minGapMs": 500
+      },
+      "wholeAppIsFeed": true,
+      "minAppVersion": null,
+      "maxAppVersion": null
+    }
+  ]
+}

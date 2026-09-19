@@ -18,6 +18,8 @@ Detectors MUST NOT read, evaluate, store, or transmit node text content, video d
 
 ### YouTube (`com.google.android.youtube`)
 - **App ID:** `youtube_shorts`
+- **Verified Versions:** 19.10.x – 19.36.x (Android 10+)
+- **Inspection Method:** `uiautomator dump` + Accessibility Node Inspector trace recording
 - **Feed Container Hints:**
   - `com.google.android.youtube:id/reel_recycler`
   - `com.google.android.youtube:id/reel_player_page_container`
@@ -26,11 +28,13 @@ Detectors MUST NOT read, evaluate, store, or transmit node text content, video d
   - `TYPE_VIEW_SCROLLED` originating from `reel_recycler`
   - Debounce window: 500 ms (`minGapMs`)
 - **Negative Verification:**
-  - Normal home feed (`browse_recycler`) does NOT trigger `inFeed = true`.
-  - Long video watch page (`watch_while_layout`, `player_view`) does NOT trigger `inFeed = true`.
+  - Normal home feed (`browse_recycler`, `results_recycler`) does NOT trigger `inFeed = true`.
+  - Long-form video watch page (`watch_while_layout`, `player_view`) does NOT trigger `inFeed = true`.
 
 ### Instagram (`com.instagram.android`)
 - **App ID:** `instagram_reels`
+- **Verified Versions:** 320.x – 350.x (Android 10+)
+- **Inspection Method:** Layout Inspector + node dump hierarchy
 - **Feed Container Hints:**
   - `com.instagram.android:id/clips_viewer_view_pager`
   - `com.instagram.android:id/clips_video_container`
@@ -39,13 +43,31 @@ Detectors MUST NOT read, evaluate, store, or transmit node text content, video d
   - `TYPE_VIEW_SCROLLED` on `clips_viewer_view_pager`
   - Debounce window: 500 ms
 - **Negative Verification:**
-  - Main chronological/algorithmic photo feed does NOT trigger `inFeed = true`.
+  - Main photo feed (`feed_recycler`, `main_feed`) does NOT trigger `inFeed = true`.
   - Direct messages, profile grid, and search do NOT trigger `inFeed = true`.
 
 ### TikTok (`com.zhiliaoapp.musically`, `com.ss.android.ugc.trill`)
 - **App ID:** `tiktok`
+- **Verified Versions:** 33.x – 36.x
+- **Inspection Method:** Process foreground observer + vertical swipe detection
 - **Rule:** `wholeAppIsFeed = true`.
-- **Logic:** Foreground usage with vertical scrolling is measured directly as feed consumption.
+- **Logic:** Foreground active time combined with vertical swipe gestures constitutes feed consumption.
+
+### Facebook Reels (`com.facebook.katana`)
+- **App ID:** `facebook_reels`
+- **Feed Container Hints:**
+  - `com.facebook.katana:id/reels_viewer_container`
+  - `com.facebook.katana:id/short_form_video_pager`
+- **Negative Verification:**
+  - Standard Facebook news feed does NOT trigger `inFeed = true`.
+
+### Snapchat Spotlight (`com.snapchat.android`)
+- **App ID:** `snapchat_spotlight`
+- **Feed Container Hints:**
+  - `com.snapchat.android:id/spotlight_pager`
+  - `com.snapchat.android:id/spotlight_fullscreen_player`
+- **Negative Verification:**
+  - Chat screen and camera viewfinder do NOT trigger `inFeed = true`.
 
 ---
 
