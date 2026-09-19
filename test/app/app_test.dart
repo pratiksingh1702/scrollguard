@@ -3,22 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:scrollguard/app/theme/app_theme.dart';
 import 'package:scrollguard/app/view/app.dart';
+import 'package:scrollguard/core/bridge/native_bridge.dart';
 
 void main() {
   group('ScrollGuardApp', () {
-    testWidgets('renders placeholder home and title', (tester) async {
+    testWidgets('renders onboarding screen on initial start', (tester) async {
+      final fakeBridge = FakeNativeBridge();
       await tester.pumpWidget(
-        const ProviderScope(
-          child: ScrollGuardApp(),
+        ProviderScope(
+          overrides: [
+            nativeBridgeProvider.overrideWithValue(fakeBridge),
+          ],
+          child: const ScrollGuardApp(),
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('ScrollGuard Home'), findsWidgets);
-      expect(
-        find.text('Feed-level addiction guard & penalty enforcement'),
-        findsOneWidget,
-      );
+      expect(find.text('Reclaim Your Focus'), findsOneWidget);
     });
 
     test('theme provides light and dark Material 3 variants', () {

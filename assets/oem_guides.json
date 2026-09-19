@@ -1,0 +1,42 @@
+{
+  "oems": [
+    {
+      "name": "Samsung",
+      "steps": [
+        "Go to Settings > Battery and device care > Battery.",
+        "Tap Background usage limits.",
+        "Add ScrollGuard to 'Never sleeping apps'."
+      ]
+    },
+    {
+      "name": "Xiaomi / MIUI / HyperOS",
+      "steps": [
+        "Go to Settings > Apps > Manage apps > ScrollGuard.",
+        "Enable 'Autostart'.",
+        "Set 'Battery saver' to 'No restrictions'."
+      ]
+    },
+    {
+      "name": "OnePlus / OxygenOS",
+      "steps": [
+        "Go to Settings > Battery > Battery usage.",
+        "Select ScrollGuard > Background activities.",
+        "Enable 'Allow background activity' and 'Allow auto-launch'."
+      ]
+    },
+    {
+      "name": "Oppo / Realme / ColorOS",
+      "steps": [
+        "Go to Settings > Battery > More battery settings > App battery management.",
+        "Select ScrollGuard and turn on 'Allow background activity' and 'Allow auto-startup'."
+      ]
+    },
+    {
+      "name": "Pixel / Stock Android",
+      "steps": [
+        "Go to Settings > Apps > ScrollGuard > App battery usage.",
+        "Choose 'Unrestricted'."
+      ]
+    }
+  ]
+}

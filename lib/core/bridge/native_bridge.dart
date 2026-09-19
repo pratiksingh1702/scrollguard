@@ -235,6 +235,13 @@ class FakeNativeBridge implements NativeBridge {
   final List<PendingSyncItem> pendingSync = [];
   final List<String> markedSyncedIds = [];
 
+  bool accessibilitySettingsOpened = false;
+  bool usageSettingsOpened = false;
+  bool batterySettingsOpened = false;
+  bool notificationPermissionRequested = false;
+  bool configApplied = false;
+  GuardConfig? appliedConfig;
+
   GuardConfig get currentConfig => _config;
 
   void emitLiveState(LiveState state) {
@@ -250,16 +257,24 @@ class FakeNativeBridge implements NativeBridge {
   Future<GuardStatus> getStatus() async => _status;
 
   @override
-  Future<void> openAccessibilitySettings() async {}
+  Future<void> openAccessibilitySettings() async {
+    accessibilitySettingsOpened = true;
+  }
 
   @override
-  Future<void> openUsageAccessSettings() async {}
+  Future<void> openUsageAccessSettings() async {
+    usageSettingsOpened = true;
+  }
 
   @override
-  Future<void> openBatterySettings() async {}
+  Future<void> openBatterySettings() async {
+    batterySettingsOpened = true;
+  }
 
   @override
-  Future<void> requestNotificationPermission() async {}
+  Future<void> requestNotificationPermission() async {
+    notificationPermissionRequested = true;
+  }
 
   @override
   Future<bool> isAccessibilityServiceEnabled() async =>
@@ -268,6 +283,8 @@ class FakeNativeBridge implements NativeBridge {
   @override
   Future<void> applyConfig(GuardConfig config) async {
     _config = config;
+    configApplied = true;
+    appliedConfig = config;
   }
 
   @override
@@ -349,7 +366,10 @@ class FakeNativeBridge implements NativeBridge {
   Stream<LiveState> watchLiveState() => _liveController.stream;
 
   @override
-  Stream<GuardStatus> watchGuardStatus() => _statusController.stream;
+  Stream<GuardStatus> watchGuardStatus() async* {
+    yield _status;
+    yield* _statusController.stream;
+  }
 
   void dispose() {
     _liveController.close();

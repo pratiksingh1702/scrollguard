@@ -733,23 +733,23 @@ Legend: **[ ]** todo · Each task: *Details* → *Acceptance*.
 
 ## PHASE 4 — Flutter shell, onboarding, permissions
 
-- [ ] **P4-T1 Domain models and repositories**
+- [x] **P4-T1 Domain models and repositories**
   *Details:* freezed entities: `GuardConfig`, `LiveState`, `Session`, `DailyStats`, `PenaltyEvent`, `GuardStatus`. Repository interfaces + implementations backed by the bridge and Drift.
   *Acceptance:* Model serialization tests; repositories tested with fakes.
 
-- [ ] **P4-T2 Providers baseline**
+- [x] **P4-T2 Providers baseline**
   *Details:* Implement providers listed in §7.3 (except contract/sync/rules). `guardStatusProvider` and `liveStateProvider` from EventChannels.
   *Acceptance:* Provider tests with `ProviderContainer` + `FakeNativeBridge`.
 
-- [ ] **P4-T3 Router gating**
+- [x] **P4-T3 Router gating**
   *Details:* `routerProvider` redirects: not onboarded → onboarding; missing critical permission → permissions; else dashboard. Re-check on app resume (`WidgetsBindingObserver`), since the user returns from Settings.
   *Acceptance:* Widget tests for each redirect case.
 
-- [ ] **P4-T4 Onboarding flow**
+- [x] **P4-T4 Onboarding flow**
   *Details:* 5 steps (§7.4). The **Accessibility prominent disclosure** screen: exact wording from `PLAY_COMPLIANCE.md`, explicit Agree/Decline; Decline leads to an explanation and a safe exit (no permission request).
   *Acceptance:* Golden tests for each step; manual check that Settings deep link only opens after Agree.
 
-- [ ] **P4-T5 Permissions screen**
+- [x] **P4-T5 Permissions screen**
   *Details:* Live checklist for Accessibility, Usage Access, Notifications (runtime request on Android 13+), Battery optimization, with OEM-specific help sheet from `oem_guides.json`.
   *Acceptance:* Ticks update automatically upon returning from settings; works on at least Pixel + one OEM device.
 
