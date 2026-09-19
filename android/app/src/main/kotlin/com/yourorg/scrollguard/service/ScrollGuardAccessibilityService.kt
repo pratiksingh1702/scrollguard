@@ -37,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.UUID
 
 /**
@@ -58,6 +59,73 @@ class ScrollGuardAccessibilityService : AccessibilityService() {
         @Volatile
         var instance: ScrollGuardAccessibilityService? = null
             private set
+    }
+
+    private var activeRuleSet: com.yourorg.scrollguard.core.detect.RuleSet? = null
+    private var isUsingRemoteRules: Boolean = false
+    private var activeRulesAppliedTs: Long = 0L
+    private var feedMatchesSinceRuleApplied: Int = 0
+
+    private fun loadRules() {
+        try {
+            val cachedFile = File(filesDir, "cached_detector_rules.json")
+            if (cachedFile.exists()) {
+                val json = cachedFile.readText()
+                val ruleSet = RuleSetParser.parse(json)
+                applyRules(ruleSet, isRemote = true)
+                return
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading cached detector rules: ${e.message}", e)
+        }
+
+        try {
+            val json = assets.open("detector_rules.json").bufferedReader().use { it.readText() }
+            val ruleSet = RuleSetParser.parse(json)
+            applyRules(ruleSet, isRemote = false)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading detector rules: ${e.message}", e)
+            val fallback = RuleSetParser.defaultFallbackRuleSet()
+            applyRules(fallback, isRemote = false)
+        }
+    }
+
+    fun applyRules(ruleSet: com.yourorg.scrollguard.core.detect.RuleSet, isRemote: Boolean = true) {
+        activeRuleSet = ruleSet
+        isUsingRemoteRules = isRemote
+        activeRulesAppliedTs = System.currentTimeMillis()
+        feedMatchesSinceRuleApplied = 0
+
+        detectorMap.clear()
+        for (app in ruleSet.apps) {
+            detectorMap[app.packageName] = RuleBasedDetector(app)
+        }
+        Log.i(TAG, "Applied detector rules v${ruleSet.version} (remote=$isRemote)")
+    }
+
+    fun rollbackToLastKnownGood() {
+        isUsingRemoteRules = false
+        try {
+            val lkgFile = File(filesDir, "last_known_good_rules.json")
+            if (lkgFile.exists()) {
+                val ruleSet = RuleSetParser.parse(lkgFile.readText())
+                applyRules(ruleSet, isRemote = false)
+                Log.i(TAG, "Rolled back to last-known-good rules v${ruleSet.version}")
+                return
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to load last-known-good rules: ${e.message}", e)
+        }
+
+        try {
+            val json = assets.open("detector_rules.json").bufferedReader().use { it.readText() }
+            val ruleSet = RuleSetParser.parse(json)
+            applyRules(ruleSet, isRemote = false)
+            Log.i(TAG, "Rolled back to bundled asset rules v${ruleSet.version}")
+        } catch (e: Exception) {
+            val fallback = RuleSetParser.defaultFallbackRuleSet()
+            applyRules(fallback, isRemote = false)
+        }
     }
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -181,25 +249,6 @@ class ScrollGuardAccessibilityService : AccessibilityService() {
         }
     }
 
-    private fun loadRules() {
-        try {
-            val json = assets.open("detector_rules.json").bufferedReader().use { it.readText() }
-            val ruleSet = RuleSetParser.parse(json)
-
-            detectorMap.clear()
-            for (app in ruleSet.apps) {
-                detectorMap[app.packageName] = RuleBasedDetector(app)
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error loading detector rules: ${e.message}", e)
-            val fallback = RuleSetParser.defaultFallbackRuleSet()
-            detectorMap.clear()
-            for (app in fallback.apps) {
-                detectorMap[app.packageName] = RuleBasedDetector(app)
-            }
-        }
-    }
-
     private fun getDetectorForPackage(packageName: String): FeedDetector {
         return detectorMap[packageName] ?: fallbackDetectors.getOrPut(packageName) {
             BehavioralFallbackDetector(appId = packageName, packageName = packageName)
@@ -222,6 +271,14 @@ class ScrollGuardAccessibilityService : AccessibilityService() {
 
         val nowElapsed = SystemClock.elapsedRealtime()
         val nowWall = System.currentTimeMillis()
+
+        // Auto-rollback check: if using remote rules and 24h of usage produced zero feed matches
+        if (isUsingRemoteRules && feedMatchesSinceRuleApplied == 0 && activeRulesAppliedTs > 0L) {
+            if (nowWall - activeRulesAppliedTs > 24 * 60 * 60 * 1000L) {
+                Log.w(TAG, "Auto-rolling back remote rules: 0 matches in 24h with guarded usage")
+                rollbackToLastKnownGood()
+            }
+        }
 
         val detector = getDetectorForPackage(packageName)
         val rootNode = try {
@@ -246,6 +303,19 @@ class ScrollGuardAccessibilityService : AccessibilityService() {
         )
 
         if (result.inFeed) {
+            feedMatchesSinceRuleApplied++
+            if (isUsingRemoteRules && feedMatchesSinceRuleApplied >= 5) {
+                try {
+                    val cachedFile = File(filesDir, "cached_detector_rules.json")
+                    if (cachedFile.exists()) {
+                        val lkgFile = File(filesDir, "last_known_good_rules.json")
+                        cachedFile.copyTo(lkgFile, overwrite = true)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to save last-known-good rules: ${e.message}")
+                }
+            }
+
             if (lastFeedElapsedTs > 0L) {
                 val deltaSec = ((nowElapsed - lastFeedElapsedTs) / 1000L).coerceIn(0L, 5L)
                 if (deltaSec > 0L) {
@@ -255,6 +325,7 @@ class ScrollGuardAccessibilityService : AccessibilityService() {
             lastFeedElapsedTs = nowElapsed
 
             sessionTracker.onFeedSignal(detector.appId, result.swiped)
+
 
             val budgetFraction = scoreEngine.getBudgetUsedFraction()
             val continuousMinutes = sessionTracker.currentSessionFeedSeconds / 60.0f

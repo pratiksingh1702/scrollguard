@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:scrollguard/core/bridge/native_bridge.dart';
 import 'package:scrollguard/core/models/guard_models.dart';
 import 'package:scrollguard/core/providers/guard_providers.dart';
+import 'package:scrollguard/core/rules/rules_updater.dart';
 
 /// Main Dashboard screen providing live doomscroll monitoring, daily budget
 /// tracking, quick pause, and emergency unlock actions.
@@ -16,6 +17,14 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(rulesUpdaterProvider).checkForUpdates();
+    });
+  }
+
   void _showPauseDialog(BuildContext context, NativeBridge bridge) {
     var selectedMinutes = 5;
 

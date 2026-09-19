@@ -858,17 +858,18 @@ Legend: **[ ]** todo · Each task: *Details* → *Acceptance*.
 
 ## PHASE 9 — Remote detector rules (keeps the product alive)
 
-- [ ] **P9-T1 Rules service** — `get-rules` function + `detector_rules` table + admin script to publish a new version (validated JSON schema, staged rollout percentage).
+- [x] **P9-T1 Rules service** — `get-rules` function + `detector_rules` table + admin script to publish a new version (validated JSON schema, staged rollout percentage).
   *Acceptance:* Publishing v13 makes clients pick it up within 24 h.
 
-- [ ] **P9-T2 Client updater** — `rulesUpdaterProvider` fetches on app open + daily background job; validates; sends to native via `applyDetectorRules`; native keeps last-known-good and auto-rolls back if the new rules produce zero matches for 24 h of guarded usage.
+- [x] **P9-T2 Client updater** — `rulesUpdaterProvider` fetches on app open + daily background job; validates; sends to native via `applyDetectorRules`; native keeps last-known-good and auto-rolls back if the new rules produce zero matches for 24 h of guarded usage.
   *Acceptance:* Bad rules never brick detection (test with a malformed payload).
 
-- [ ] **P9-T3 Detection health dashboard** — Supabase view/SQL of `rules_stale` rate per app version to notice breakage quickly.
+- [x] **P9-T3 Detection health dashboard** — Supabase view/SQL of `rules_stale` rate per app version to notice breakage quickly.
   *Acceptance:* Query documented in `DETECTOR_RULES.md`.
 
-- [ ] **P9-T4 Maintenance playbook** — write `docs/RULES_MAINTENANCE.md`: how to re-discover IDs after an app update, test with the trace replayer, publish.
+- [x] **P9-T4 Maintenance playbook** — write `docs/RULES_MAINTENANCE.md`: how to re-discover IDs after an app update, test with the trace replayer, publish.
   *Acceptance:* A new person can fix a broken rule by following it.
+
 
 ---
 

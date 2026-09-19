@@ -73,3 +73,29 @@ Detectors MUST NOT read, evaluate, store, or transmit node text content, video d
 
 ## 3. Remote Rules Schema & Fallback
 The application bundles `assets/detector_rules.json` as the baseline. Remote updates from the backend override bundled rules only when validated against the local schema. If remote rules produce zero matches over an extended usage window, the system automatically falls back to bundled rules.
+
+---
+
+## 4. Detection Health Dashboard & Monitoring Query
+
+To detect UI breakages in guarded applications (e.g. YouTube or Instagram changing container IDs in an update), the backend aggregates `rules_stale` and `usage_divergence` signals from client telemetry.
+
+### 4.1 Real-Time Health Query (SQL View `detection_health`)
+```sql
+SELECT
+    app_id,
+    target_app_version,
+    total_guard_events,
+    stale_events_count,
+    divergence_events_count,
+    stale_rate_pct,
+    status,
+    last_stale_event_at
+FROM public.detection_health
+ORDER BY stale_rate_pct DESC, total_guard_events DESC;
+```
+
+### 4.2 Automated Alert Thresholds
+- **HEALTHY:** `stale_rate_pct == 0%` (detection functioning normally).
+- **WARNING:** `0% < stale_rate_pct <= 10%` (minor variance or user edge cases).
+- **CRITICAL:** `stale_rate_pct > 10%` (indicates a breaking app UI change in `target_app_version`). Triggers an alert to update detector rules immediately following the Maintenance Playbook (`docs/RULES_MAINTENANCE.md`).

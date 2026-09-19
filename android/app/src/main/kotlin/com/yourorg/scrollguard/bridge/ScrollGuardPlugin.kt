@@ -11,6 +11,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
+import com.yourorg.scrollguard.core.detect.RuleSetParser
 import com.yourorg.scrollguard.core.model.GuardConfig
 import com.yourorg.scrollguard.core.stats.UsageStatsReader
 import com.yourorg.scrollguard.data.AppRoomDatabase
@@ -21,6 +22,7 @@ import com.yourorg.scrollguard.worker.WatchdogWorker
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -252,7 +254,16 @@ class ScrollGuardPlugin : FlutterPlugin, GuardHostApi {
 
     override fun applyDetectorRules(rulesJson: String) {
         Log.d(TAG, "applyDetectorRules called with ${rulesJson.length} bytes")
-        // Persist or apply to service if needed
+        val ctx = context ?: return
+        try {
+            val ruleSet = RuleSetParser.parse(rulesJson)
+            val file = File(ctx.filesDir, "cached_detector_rules.json")
+            file.writeText(rulesJson)
+            ScrollGuardAccessibilityService.instance?.applyRules(ruleSet, isRemote = true)
+            Log.i(TAG, "Successfully applied detector rules v${ruleSet.version} to active service")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse/apply detector rules: ${e.message}", e)
+        }
     }
 
     override fun getSessions(
