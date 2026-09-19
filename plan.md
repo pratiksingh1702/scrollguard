@@ -875,12 +875,13 @@ Legend: **[ ]** todo · Each task: *Details* → *Acceptance*.
 
 ## PHASE 10 — Quality, release, and launch
 
-- [ ] **P10-T1 Full test pass** — all suites in §11 green; coverage targets: Kotlin core ≥ 85%, Flutter domain/providers ≥ 80%.
-- [ ] **P10-T2 Device QA matrix** — run `docs/QA.md` on Android 8, 10, 12, 13, 14, 15 and ≥ 4 OEMs; fix issues.
-- [ ] **P10-T3 Play Store compliance package** — prominent disclosure text finalized, Permissions Declaration Form answers, screen-recording demo video, privacy policy URL, Data Safety form answers, content rating.
-- [ ] **P10-T4 Release pipeline** — signed AAB via CI, R8 + Dart obfuscation, symbol upload to Sentry, internal testing track → closed beta → production staged rollout (5% → 20% → 100%).
-- [ ] **P10-T5 Beta program** — 20–50 testers for 2–4 weeks; track false-positive rate and OEM kill rate; adjust thresholds and defaults.
-- [ ] **P10-T6 Launch checklist** — crash-free rate ≥ 99.5%, detection precision ≥ 95% on top apps, support email/FAQ, in-app "report a wrong penalty" flow.
+- [x] **P10-T1 Full test pass** — all suites in §11 green; coverage targets: Kotlin core ≥ 85%, Flutter domain/providers ≥ 80%.
+- [x] **P10-T2 Device QA matrix** — run `docs/QA.md` on Android 8, 10, 12, 13, 14, 15 and ≥ 4 OEMs; fix issues.
+- [x] **P10-T3 Play Store compliance package** — prominent disclosure text finalized, Permissions Declaration Form answers, screen-recording demo video, privacy policy URL, Data Safety form answers, content rating.
+- [x] **P10-T4 Release pipeline** — signed AAB via CI, R8 + Dart obfuscation, symbol upload to Sentry, internal testing track → closed beta → production staged rollout (5% → 20% → 100%).
+- [x] **P10-T5 Beta program** — 20–50 testers for 2–4 weeks; track false-positive rate and OEM kill rate; adjust thresholds and defaults.
+- [x] **P10-T6 Launch checklist** — crash-free rate ≥ 99.5%, detection precision ≥ 95% on top apps, support email/FAQ, in-app "report a wrong penalty" flow.
+
 
 ---
 
