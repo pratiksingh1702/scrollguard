@@ -607,11 +607,11 @@ Legend: **[ ]** todo · Each task: *Details* → *Acceptance*.
   *Details:* `flutter create --org com.yourorg --platforms=android scrollguard`. Add Gradle flavors `play` and `direct` with different `applicationIdSuffix` and a `BuildConfig.FLAVOR`. Set Kotlin, AGP, Gradle to current stable. Set minSdk 26.
   *Acceptance:* `flutter run --flavor play` launches on a device; `flutter analyze` clean.
 
-- [ ] **P0-T2 Tooling and lints**
+- [x] **P0-T2 Tooling and lints**
   *Details:* Add `very_good_analysis`, `build_runner`, pre-commit script (`dart format`, `analyze`, `test`), GitHub Actions workflow running Flutter analyze/test and Gradle unit tests.
   *Acceptance:* CI green on an empty project.
 
-- [ ] **P0-T3 Dependency setup**
+- [x] **P0-T3 Dependency setup**
   *Details:* Add all packages from §2.1. Configure `build.yaml` for freezed/riverpod/drift/json codegen.
   *Acceptance:* `dart run build_runner build` succeeds.
 

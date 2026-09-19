@@ -1,0 +1,9 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          explicit_to_json: true
+      drift_dev:
+        options:
+          apply_converters_on_variables: true
