@@ -3,8 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scrollguard/core/models/guard_models.dart';
 import 'package:scrollguard/core/providers/guard_providers.dart';
+import 'package:scrollguard/features/dashboard/dashboard_screen.dart';
 import 'package:scrollguard/features/onboarding/onboarding_screen.dart';
+import 'package:scrollguard/features/penalties/penalties_screen.dart';
 import 'package:scrollguard/features/permissions/permissions_screen.dart';
+import 'package:scrollguard/features/rules/rules_screen.dart';
+import 'package:scrollguard/features/sessions/sessions_screen.dart';
+import 'package:scrollguard/features/settings/settings_screen.dart';
+import 'package:scrollguard/features/stats/stats_screen.dart';
 
 /// Tracks whether the user has completed the initial onboarding flow.
 final onboardingCompletedProvider = StateProvider<bool>((ref) => false);
@@ -105,42 +111,27 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/dashboard',
         name: 'dashboard',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'Dashboard',
-          subtitle: 'Live Doomscroll Guard & Daily Budget',
-        ),
+        builder: (context, state) => const DashboardScreen(),
       ),
       GoRoute(
         path: '/stats',
         name: 'stats',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'Stats',
-          subtitle: 'Weekly & Monthly Trends',
-        ),
+        builder: (context, state) => const StatsScreen(),
       ),
       GoRoute(
         path: '/sessions',
         name: 'sessions',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'Sessions',
-          subtitle: 'Short-Video Session History',
-        ),
+        builder: (context, state) => const SessionsScreen(),
       ),
       GoRoute(
         path: '/rules',
         name: 'rules',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'Rules & Budgets',
-          subtitle: 'Configure Ladders & Limits',
-        ),
+        builder: (context, state) => const RulesScreen(),
       ),
       GoRoute(
         path: '/penalties',
         name: 'penalties',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'Penalty History',
-          subtitle: 'Transparent Log of Actions',
-        ),
+        builder: (context, state) => const PenaltiesScreen(),
       ),
       GoRoute(
         path: '/contract',
@@ -153,10 +144,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings',
         name: 'settings',
-        builder: (context, state) => const PlaceholderScreen(
-          title: 'Settings & Diagnostics',
-          subtitle: 'Account & Service Status',
-        ),
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );

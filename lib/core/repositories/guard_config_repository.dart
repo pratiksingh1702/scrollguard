@@ -8,10 +8,11 @@ abstract class GuardConfigRepository {
 }
 
 class BridgeGuardConfigRepository implements GuardConfigRepository {
-  BridgeGuardConfigRepository(this._bridge);
+  BridgeGuardConfigRepository(this._bridge, [GuardConfig? initialConfig])
+      : _cachedConfig = initialConfig ?? const GuardConfig();
 
   final NativeBridge _bridge;
-  GuardConfig _cachedConfig = const GuardConfig();
+  GuardConfig _cachedConfig;
 
   @override
   Future<GuardConfig> getConfig() async {

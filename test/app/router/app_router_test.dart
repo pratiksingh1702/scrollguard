@@ -78,7 +78,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Live Doomscroll Guard & Daily Budget'),
+        find.text('Daily Feed Budget'),
         findsOneWidget,
       );
     });

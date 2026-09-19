@@ -757,31 +757,31 @@ Legend: **[ ]** todo · Each task: *Details* → *Acceptance*.
 
 ## PHASE 5 — Core screens
 
-- [ ] **P5-T1 Dashboard**
+- [x] **P5-T1 Dashboard**
   *Details:* Budget ring, live card (appears when `liveState.inFeed`), streak, next-penalty preview, guard status chip, quick pause/emergency actions.
   *Acceptance:* Widget tests with scripted live states; visually matches design; 60 fps during live updates.
 
-- [ ] **P5-T2 Stats**
+- [x] **P5-T2 Stats**
   *Details:* Weekly/monthly bar charts, per-app breakdown, average dwell, best/worst day.
   *Acceptance:* Correct aggregates vs seeded data; golden tests.
 
-- [ ] **P5-T3 Sessions list + detail**
+- [x] **P5-T3 Sessions list + detail**
   *Details:* Paginated list grouped by day; detail shows timeline of dwell times.
   *Acceptance:* Handles 10k sessions smoothly (pagination/lazy queries).
 
-- [ ] **P5-T4 Rules screen**
+- [x] **P5-T4 Rules screen**
   *Details:* Edit guarded apps (only apps installed, using package visibility), daily budget (global + per app), ladder thresholds with validation (L0 < L1 < L2), cool-down, reset hour, emergency allowance. Apply via `applyConfig`.
   *Acceptance:* Validation tests; changes persist and take effect natively.
 
-- [ ] **P5-T5 Penalties history**
+- [x] **P5-T5 Penalties history**
   *Details:* List of penalty events with human-readable reason ("Budget reached: 30/30 min in Instagram Reels").
   *Acceptance:* Matches native Room data.
 
-- [ ] **P5-T6 Settings + diagnostics**
+- [x] **P5-T6 Settings + diagnostics**
   *Details:* Diagnostics page: service status, rules version, last feed match per app, stale flags, export logs (no content). Data export/delete hooks (wired in Phase 6).
   *Acceptance:* Diagnostics reflect real state.
 
-- [ ] **P5-T7 Local notifications**
+- [x] **P5-T7 Local notifications**
   *Details:* Daily summary, "guard is off" alert (from native), streak milestones.
   *Acceptance:* Notifications fire on schedule; tapping deep-links to the right screen.
 

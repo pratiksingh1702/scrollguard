@@ -51,11 +51,25 @@ final todayStatsProvider = FutureProvider.family<DailyStatsRecord?, String>((
   return repo.getDailyStats(dateIso);
 });
 
-/// 5. Weekly stats provider
+final currentDayStatsProvider = FutureProvider<DailyStatsRecord?>((ref) async {
+  final now = DateTime.now();
+  final dateIso =
+      '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+  final repo = ref.watch(statsRepositoryProvider);
+  return repo.getDailyStats(dateIso);
+});
+
+/// 5. Weekly and monthly stats providers
 final weeklyStatsProvider =
     FutureProvider<List<DailyStatsRecord>>((ref) async {
   final repo = ref.watch(statsRepositoryProvider);
   return repo.getHistoricalStats(limitDays: 7);
+});
+
+final monthlyStatsProvider =
+    FutureProvider<List<DailyStatsRecord>>((ref) async {
+  final repo = ref.watch(statsRepositoryProvider);
+  return repo.getHistoricalStats();
 });
 
 /// 6. Session query range and provider
@@ -86,6 +100,14 @@ final sessionsProvider =
   return repo.getSessions(range.fromEpochMs, range.toEpochMs);
 });
 
+final recentSessionsProvider = FutureProvider<List<SessionRecord>>((ref) async {
+  final now = DateTime.now();
+  final fromMs = now.subtract(const Duration(days: 30)).millisecondsSinceEpoch;
+  final toMs = now.millisecondsSinceEpoch;
+  final repo = ref.watch(sessionRepositoryProvider);
+  return repo.getSessions(fromMs, toMs);
+});
+
 /// 7. Penalties provider
 final penaltiesProvider =
     FutureProvider.family<List<PenaltyEventRecord>, SessionQueryRange>((
@@ -94,4 +116,13 @@ final penaltiesProvider =
 ) async {
   final repo = ref.watch(penaltyRepositoryProvider);
   return repo.getPenaltyEvents(range.fromEpochMs, range.toEpochMs);
+});
+
+final recentPenaltiesProvider =
+    FutureProvider<List<PenaltyEventRecord>>((ref) async {
+  final now = DateTime.now();
+  final fromMs = now.subtract(const Duration(days: 30)).millisecondsSinceEpoch;
+  final toMs = now.millisecondsSinceEpoch;
+  final repo = ref.watch(penaltyRepositoryProvider);
+  return repo.getPenaltyEvents(fromMs, toMs);
 });
