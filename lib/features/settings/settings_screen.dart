@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:scrollguard/core/auth/auth_controller.dart';
 import 'package:scrollguard/core/models/guard_models.dart';
 import 'package:scrollguard/core/providers/guard_providers.dart';
 
@@ -38,7 +39,14 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 20),
             _buildAntiTamperSection(theme),
             const SizedBox(height: 20),
-            _buildDataControlsSection(context, theme, status, config, sessions),
+            _buildDataControlsSection(
+              context,
+              ref,
+              theme,
+              status,
+              config,
+              sessions,
+            ),
             const SizedBox(height: 20),
             _buildComplianceSection(context, theme),
             const SizedBox(height: 32),
@@ -395,6 +403,7 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildDataControlsSection(
     BuildContext context,
+    WidgetRef ref,
     ThemeData theme,
     GuardStatus status,
     GuardConfig config,
@@ -410,14 +419,14 @@ class SettingsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Privacy & Diagnostics Export',
+              'Privacy & Data Controls',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 6),
             Text(
-              'Export structural diagnostics for troubleshooting. In accordance with our privacy policy, exported traces never contain screen text, video titles, or user IDs.',
+              'Export diagnostics or cloud data, or manage your account data. In accordance with our privacy policy, exported traces never contain screen text, video titles, or user messages.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.textTheme.bodySmall?.color?.withAlpha(180),
               ),
@@ -434,11 +443,29 @@ class SettingsScreen extends ConsumerWidget {
             const Divider(),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.delete_forever_outlined, color: theme.colorScheme.error),
+              leading: const Icon(Icons.cloud_download_outlined),
+              title: const Text('Export Account Data (Cloud)'),
+              subtitle: const Text('GDPR export of synced stats, penalty history, and profile'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _exportAccountData(context, ref),
+            ),
+            const Divider(),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(Icons.delete_outline, color: theme.colorScheme.error),
               title: Text('Clear Local Database', style: TextStyle(color: theme.colorScheme.error)),
               subtitle: const Text('Deletes local sessions, daily aggregates, and penalty history'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => _confirmClearData(context),
+            ),
+            const Divider(),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(Icons.no_accounts_outlined, color: theme.colorScheme.error),
+              title: Text('Delete Account & Cloud Data', style: TextStyle(color: theme.colorScheme.error)),
+              subtitle: const Text('Permanently deletes cloud account, sync records, and contracts'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _confirmDeleteAccount(context, ref),
             ),
           ],
         ),
@@ -603,6 +630,95 @@ class SettingsScreen extends ConsumerWidget {
               );
             },
             child: const Text('Clear Data'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _exportAccountData(BuildContext context, WidgetRef ref) async {
+    try {
+      final exportData =
+          await ref.read(authControllerProvider.notifier).exportData();
+      if (!context.mounted) return;
+      final jsonStr = const JsonEncoder.withIndent('  ').convert(exportData);
+
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Exported Account Data'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: SelectableText(
+                jsonStr,
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: jsonStr));
+                Navigator.of(ctx).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Account data copied to clipboard.'),
+                  ),
+                );
+              },
+              child: const Text('Copy to Clipboard'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Done'),
+            ),
+          ],
+        ),
+      );
+    } on Object catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to export account data: $e')),
+      );
+    }
+  }
+
+  void _confirmDeleteAccount(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Account & Cloud Data?'),
+        content: const Text(
+          'This will permanently delete your account, synced stats, penalty events, and any active contracts. This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              try {
+                await ref.read(authControllerProvider.notifier).deleteAccount();
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Account deleted successfully.'),
+                  ),
+                );
+              } on Object catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Failed to delete account: $e')),
+                );
+              }
+            },
+            child: const Text('Delete Permanently'),
           ),
         ],
       ),

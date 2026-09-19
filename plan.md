@@ -789,23 +789,23 @@ Legend: **[ ]** todo · Each task: *Details* → *Acceptance*.
 
 ## PHASE 6 — Backend, auth, sync
 
-- [ ] **P6-T1 Supabase project + migrations**
+- [x] **P6-T1 Supabase project + migrations**
   *Details:* Create schema §8.3 as SQL migrations; enable RLS with policies; seed a bundled rules version.
   *Acceptance:* RLS tests prove user A cannot read user B's rows.
 
-- [ ] **P6-T2 Auth**
+- [x] **P6-T2 Auth**
   *Details:* Email + Google sign-in via `supabase_flutter`; `authControllerProvider`; guest mode allowed until money features are enabled (guest data links to account on sign-up).
   *Acceptance:* Sign up / in / out flows tested; router respects auth where required.
 
-- [ ] **P6-T3 Sync pipeline**
+- [x] **P6-T3 Sync pipeline**
   *Details:* `syncControllerProvider`: gathers `getPendingSync()`, posts to `sync-day` (idempotent by ID), calls `markSynced`. Triggers: app open, day rollover, connectivity regained, WorkManager periodic (native worker with a lightweight HTTP call if Flutter is not running, or defer until app open — decision in `DECISIONS.md`).
   *Acceptance:* Offline for a day → all data appears server-side after reconnect exactly once.
 
-- [ ] **P6-T4 Heartbeat + guard-silent detection (server)**
+- [x] **P6-T4 Heartbeat + guard-silent detection (server)**
   *Details:* `heartbeat` function stores last seen; a scheduled function marks gaps and creates `guard_events`.
   *Acceptance:* Simulated gap produces a server event.
 
-- [ ] **P6-T5 Data export and account deletion**
+- [x] **P6-T5 Data export and account deletion**
   *Details:* `export-data` (JSON zip), `delete-account` (cascade + Stripe customer deletion). UI in Settings.
   *Acceptance:* Deleting an account removes all rows (verified by test).
 

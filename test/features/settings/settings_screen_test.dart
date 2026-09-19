@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:scrollguard/core/auth/auth_models.dart';
+import 'package:scrollguard/core/auth/auth_repository.dart';
 import 'package:scrollguard/core/models/guard_models.dart';
 import 'package:scrollguard/core/providers/guard_providers.dart';
 import 'package:scrollguard/features/settings/settings_screen.dart';
@@ -18,6 +20,7 @@ void main() {
       guardedApps: ['com.google.android.youtube', 'com.instagram.android'],
     ),
     List<SessionRecord> sessions = const [],
+    AuthRepository? authRepo,
   }) {
     return ProviderScope(
       overrides: [
@@ -26,6 +29,15 @@ void main() {
           () => _FakeConfigNotifier(config),
         ),
         recentSessionsProvider.overrideWith((ref) async => sessions),
+        authRepositoryProvider.overrideWithValue(
+          authRepo ??
+              FakeAuthRepository(
+                initialUser: const UserAccount(
+                  id: 'usr-1',
+                  email: 'test@scrollguard.app',
+                ),
+              ),
+        ),
       ],
       child: const MaterialApp(
         home: SettingsScreen(),
@@ -121,6 +133,61 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Clear All Local Data?'), findsNothing);
+  });
+
+  testWidgets('Export Account Data (Cloud) opens modal with user records preview',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Export Account Data (Cloud)'));
+    await tester.tap(find.text('Export Account Data (Cloud)'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Exported Account Data'), findsOneWidget);
+    expect(find.text('Copy to Clipboard'), findsOneWidget);
+    expect(find.text('Done'), findsOneWidget);
+
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Exported Account Data'), findsNothing);
+  });
+
+  testWidgets('Delete Account shows confirmation and triggers deletion',
+      (tester) async {
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final fakeRepo = FakeAuthRepository(
+      initialUser: const UserAccount(
+        id: 'usr-1',
+        email: 'delete_me@scrollguard.app',
+      ),
+    );
+
+    await tester.pumpWidget(createTestWidget(authRepo: fakeRepo));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Delete Account & Cloud Data'));
+    await tester.tap(find.text('Delete Account & Cloud Data'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Delete Account & Cloud Data?'), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+    expect(find.text('Delete Permanently'), findsOneWidget);
+
+    await tester.tap(find.text('Delete Permanently'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Delete Account & Cloud Data?'), findsNothing);
+    expect(find.text('Account deleted successfully.'), findsOneWidget);
+    expect(fakeRepo.currentUser, isNull);
   });
 }
 

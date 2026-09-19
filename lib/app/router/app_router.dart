@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:scrollguard/core/auth/auth_controller.dart';
+import 'package:scrollguard/core/auth/auth_models.dart';
 import 'package:scrollguard/core/models/guard_models.dart';
 import 'package:scrollguard/core/providers/guard_providers.dart';
+import 'package:scrollguard/features/auth/auth_screen.dart';
 import 'package:scrollguard/features/dashboard/dashboard_screen.dart';
 import 'package:scrollguard/features/onboarding/onboarding_screen.dart';
 import 'package:scrollguard/features/penalties/penalties_screen.dart';
@@ -26,6 +29,9 @@ class RouterNotifier extends ChangeNotifier with WidgetsBindingObserver {
         notifyListeners();
       })
       ..listen(guardStatusProvider, (_, __) {
+        notifyListeners();
+      })
+      ..listen(authControllerProvider, (_, __) {
         notifyListeners();
       });
   }
@@ -66,7 +72,19 @@ class RouterNotifier extends ChangeNotifier with WidgetsBindingObserver {
       return isPermissions ? null : '/permissions';
     }
 
-    // 3. If fully onboarded and permitted, redirect out of gate screens to dashboard
+    // 3. If accessing money commitment contracts, require a non-guest authenticated account
+    if (location == '/contract') {
+      final authState = _ref.read(authControllerProvider);
+      final isVerifiedUser = switch (authState) {
+        AppAuthenticated(:final user) => !user.isGuest,
+        _ => false,
+      };
+      if (!isVerifiedUser) {
+        return '/auth';
+      }
+    }
+
+    // 4. If fully onboarded and permitted, redirect out of gate screens to dashboard
     if (isOnboarding || isPermissions || location == '/') {
       return '/dashboard';
     }
@@ -145,6 +163,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/settings',
         name: 'settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/auth',
+        name: 'auth',
+        builder: (context, state) => const AuthScreen(),
       ),
     ],
   );
