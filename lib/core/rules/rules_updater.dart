@@ -11,10 +11,11 @@ final rulesUpdaterProvider = Provider<RulesUpdater>((ref) {
   SupabaseClient? supabase;
   try {
     supabase = Supabase.instance.client;
-  } catch (_) {
+  } on Object {
     // Supabase might not be initialized yet (e.g. offline/guest)
     supabase = null;
   }
+
   return RulesUpdater(nativeBridge: nativeBridge, supabaseClient: supabase);
 });
 
@@ -92,10 +93,11 @@ class RulesUpdater {
       _currentVersion = newVersion;
       dev.log('Applied detector rules v$newVersion to native layer', name: 'RulesUpdater');
       return true;
-    } catch (e, stack) {
+    } on Object catch (e, stack) {
       dev.log('Error updating detector rules: $e', name: 'RulesUpdater', error: e, stackTrace: stack);
       return false;
     }
+
   }
 
   /// Strict validation of rules payload to prevent malformed or malicious payloads from bricking detection.
