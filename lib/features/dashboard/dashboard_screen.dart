@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scrollguard/core/bridge/native_bridge.dart';
 import 'package:scrollguard/core/models/guard_models.dart';
+import 'package:scrollguard/core/notifications/notification_service.dart';
 import 'package:scrollguard/core/providers/guard_providers.dart';
 import 'package:scrollguard/core/rules/rules_updater.dart';
 
@@ -17,6 +18,8 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  int _lastNotifiedMins = 0;
+
   @override
   void initState() {
     super.initState();
@@ -24,6 +27,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ref.read(rulesUpdaterProvider).checkForUpdates();
     });
   }
+
 
   void _showPauseDialog(BuildContext context, NativeBridge bridge) {
     var selectedMinutes = 5;
@@ -174,8 +178,28 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final configAsync = ref.watch(guardConfigProvider);
     final todayStatsAsync = ref.watch(currentDayStatsProvider);
 
+    ref.listen<AsyncValue<LiveState>>(liveStateProvider, (prev, next) {
+      final live = next.value;
+      if (live != null && live.inFeed) {
+        final mins = live.sessionSeconds ~/ 60;
+        final isHigh = (mins >= 5 || live.budgetFraction >= 0.5) && mins > _lastNotifiedMins;
+        if (isHigh) {
+          _lastNotifiedMins = mins;
+          ref.read(notificationServiceProvider).showHighUsageAlert(
+                appName: _formatPackageName(live.appId),
+                sessionMinutes: math.max(1, mins),
+                swipeCount: live.swipeCount,
+                isDoomscrolling: live.isDoomscrolling,
+              );
+        }
+      } else if (live != null && !live.inFeed) {
+        _lastNotifiedMins = 0;
+      }
+    });
+
     final status = guardStatusAsync.value ?? const GuardStatus();
     final liveState = liveStateAsync.value ?? const LiveState();
+
     final config = configAsync.value ?? const GuardConfig();
     final todayStats = todayStatsAsync.value;
 
@@ -476,10 +500,48 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ),
               ],
             ),
+
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: live.isDoomscrolling
+                    ? theme.colorScheme.error.withValues(alpha: 0.15)
+                    : theme.colorScheme.primary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    live.isDoomscrolling
+                        ? Icons.warning_amber_rounded
+                        : Icons.play_circle_outline_rounded,
+                    size: 16,
+                    color: live.isDoomscrolling
+                        ? theme.colorScheme.error
+                        : theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    live.isDoomscrolling
+                        ? 'Rapid Swipes: Doomscrolling (${live.swipeCount} swipes)'
+                        : 'Extended Viewing: Watching (${live.swipeCount} swipes)',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: live.isDoomscrolling
+                          ? theme.colorScheme.error
+                          : theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
+
   }
 
   String _intensityLabel(int intensity) {

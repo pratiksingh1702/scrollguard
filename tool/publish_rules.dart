@@ -1,4 +1,5 @@
 // tool/publish_rules.dart
+// ignore_for_file: avoid_catches_without_on_clauses, omit_local_variable_types, cascade_invocations
 // Admin CLI script to validate and publish detector_rules to Supabase.
 // Usage:
 //   dart run tool/publish_rules.dart [--file=assets/detector_rules.json] [--rollout=100] [--min-app-build=1] [--dry-run]

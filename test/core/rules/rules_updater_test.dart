@@ -21,7 +21,7 @@ void main() {
 
     setUp(() {
       mockBridge = MockNativeBridge();
-      updater = RulesUpdater(nativeBridge: mockBridge, initialVersion: 1);
+      updater = RulesUpdater(nativeBridge: mockBridge);
     });
 
     test('applies valid new rules payload and increments version', () async {
@@ -76,28 +76,29 @@ void main() {
 
     test('rejects malformed payload without calling bridge', () async {
       final malformedPayloads = [
-        {'version': 'not_an_int', 'rules': {}},
-        {
+        <String, dynamic>{'version': 'not_an_int', 'rules': <String, dynamic>{}},
+        <String, dynamic>{
           'version': 2,
-          'rules': {'apps': []}, // empty apps
+          'rules': <String, dynamic>{'apps': <Map<String, dynamic>>[]}, // empty apps
         },
-        {
+        <String, dynamic>{
           'version': 2,
-          'rules': {
+          'rules': <String, dynamic>{
             'apps': [
               {'id': ''}, // missing package and empty id
             ],
           },
         },
-        {
+        <String, dynamic>{
           'version': 2,
           'rules': 'not_a_map',
         },
       ];
 
+
       for (final payload in malformedPayloads) {
         final updated = await updater.checkForUpdates(
-          mockResponse: payload as Map<String, dynamic>,
+          mockResponse: payload,
         );
         expect(updated, isFalse);
         expect(mockBridge.applyCallCount, equals(0));
