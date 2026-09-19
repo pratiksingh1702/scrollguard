@@ -709,23 +709,23 @@ Legend: **[ ]** todo · Each task: *Details* → *Acceptance*.
 
 ## PHASE 3 — Bridge (Pigeon + EventChannel)
 
-- [ ] **P3-T1 Pigeon definition and codegen**
+- [x] **P3-T1 Pigeon definition and codegen**
   *Details:* Write `pigeons/native_api.dart` per §6.1; configure Dart + Kotlin output; add script `tool/gen_pigeon.sh`.
   *Acceptance:* Generated files compile on both sides.
 
-- [ ] **P3-T2 ScrollGuardPlugin (Kotlin)**
+- [x] **P3-T2 ScrollGuardPlugin (Kotlin)**
   *Details:* Implement `GuardHostApi`, register as FlutterPlugin. Service ↔ plugin communication via a process-wide `GuardStateHolder` (StateFlow) since the service and the Flutter engine live in the same process but different lifecycles.
   *Acceptance:* `getStatus()` returns real permission/service state from Dart.
 
-- [ ] **P3-T3 EventChannels**
+- [x] **P3-T3 EventChannels**
   *Details:* `scrollguard/live` and `scrollguard/guardStatus` per §6.2, lazy publishing, throttled to 1 Hz.
   *Acceptance:* Dart test app prints live updates while scrolling Shorts; no updates (and no CPU use) when no listener.
 
-- [ ] **P3-T4 Dart NativeBridge wrapper + fake**
+- [x] **P3-T4 Dart NativeBridge wrapper + fake**
   *Details:* `NativeBridge` interface, `AndroidNativeBridge` (real) and `FakeNativeBridge` (scripted). Map DTOs → domain entities. Expose through `nativeBridgeProvider`.
   *Acceptance:* Unit tests using the fake; swapping via `ProviderScope.overrides` works.
 
-- [ ] **P3-T5 Config push**
+- [x] **P3-T5 Config push**
   *Details:* `applyConfig` persists config natively and takes effect immediately without restarting the service.
   *Acceptance:* Changing budget from Dart changes the next penalty threshold on the device within 1 s.
 

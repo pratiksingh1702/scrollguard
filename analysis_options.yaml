@@ -4,6 +4,8 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
+    - "pigeons/**"
+    - "lib/core/bridge/generated/**"
     - "lib/bridge/native_api.g.dart"
     - "test/.test_coverage.dart"
     - "build/**"
