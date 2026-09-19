@@ -154,7 +154,14 @@ class LiveState {
   final int emergencyUnlocksRemaining;
   final bool isPaused;
   final int pausedUntilMs;
+
+  /// Whether the current session exhibits rapid compulsive doomscrolling behavior
+  /// (high intensity or high swipes-per-minute rate).
+  bool get isDoomscrolling =>
+      intensity >= 50 ||
+      (sessionSeconds > 30 && (swipeCount / (sessionSeconds / 60.0)) >= 10);
 }
+
 
 @immutable
 class GuardStatus {

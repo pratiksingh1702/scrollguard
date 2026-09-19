@@ -35,10 +35,15 @@ import com.yourorg.scrollguard.overlay.OverlayController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.os.Build
+import androidx.core.app.NotificationCompat
 import java.io.File
+import java.util.Locale
 import java.util.UUID
+import kotlin.math.max
 
 /**
  * Core AccessibilityService for detecting short-video feeds and enforcing the penalty ladder.
@@ -51,6 +56,8 @@ class ScrollGuardAccessibilityService : AccessibilityService() {
 
     companion object {
         private const val TAG = "ScrollGuardA11y"
+        private const val HIGH_USAGE_CHANNEL_ID = "scrollguard_high_usage"
+        private const val HIGH_USAGE_NOTIFICATION_ID = 2001
 
         @Volatile
         var isServiceRunning: Boolean = false
@@ -60,6 +67,10 @@ class ScrollGuardAccessibilityService : AccessibilityService() {
         var instance: ScrollGuardAccessibilityService? = null
             private set
     }
+
+    private var lastHighUsageNotificationTs: Long = 0L
+    private var lastNotifiedMinutes: Int = 0
+
 
     private var activeRuleSet: com.yourorg.scrollguard.core.detect.RuleSet? = null
     private var isUsingRemoteRules: Boolean = false
@@ -229,7 +240,9 @@ class ScrollGuardAccessibilityService : AccessibilityService() {
         isServiceRunning = true
         instance = this
 
+        createNotificationChannels()
         loadRules()
+
 
         serviceScope.launch(Dispatchers.IO) {
             config = configStore.loadConfig()
@@ -346,10 +359,20 @@ class ScrollGuardAccessibilityService : AccessibilityService() {
             )
             sessionTracker.updateScoreAndPenalty(intensity, penaltyState.activeLevel.value)
 
+            checkAndPostHighUsageNotification(
+                appId = detector.appId,
+                continuousMinutes = continuousMinutes,
+                swipes = sessionTracker.currentSessionSwipes,
+                intensity = intensity,
+                budgetFraction = budgetFraction,
+                nowWall = nowWall
+            )
+
             executeActions(evalResult.actions)
         } else {
             sessionTracker.onFeedAbsent()
             lastFeedElapsedTs = 0L
+            lastNotifiedMinutes = 0
             if (penaltyState.activeLevel != PenaltyLevel.L2_LOCK &&
                 penaltyState.activeLevel != PenaltyLevel.L3_STRIKE
             ) {
@@ -357,7 +380,86 @@ class ScrollGuardAccessibilityService : AccessibilityService() {
             }
         }
 
-        updateLiveState(inFeed = result.inFeed, appId = if (result.inFeed) detector.appId else "")
+        val currentIntensity = if (result.inFeed) {
+            scoreEngine.computeIntensity(
+                swipesPerMinute = sessionTracker.currentSessionSwipes / continuousMinutes.coerceAtLeast(0.1f),
+                avgDwellMs = 0L,
+                continuousMinutes = continuousMinutes
+            )
+        } else 0
+        updateLiveState(inFeed = result.inFeed, appId = if (result.inFeed) detector.appId else "", intensity = currentIntensity)
+    }
+
+    private fun checkAndPostHighUsageNotification(
+        appId: String,
+        continuousMinutes: Float,
+        swipes: Int,
+        intensity: Int,
+        budgetFraction: Float,
+        nowWall: Long
+    ) {
+        val minutesInt = continuousMinutes.toInt()
+        val isHighUsage = (minutesInt >= 5 || budgetFraction >= 0.5f) && minutesInt > lastNotifiedMinutes
+        val timeSinceLastAlert = nowWall - lastHighUsageNotificationTs
+
+        if (isHighUsage && timeSinceLastAlert >= 5 * 60 * 1000L) {
+            lastHighUsageNotificationTs = nowWall
+            lastNotifiedMinutes = minutesInt
+            postHighUsageNotification(appId, max(1, minutesInt), swipes, intensity)
+        }
+    }
+
+    private fun postHighUsageNotification(appId: String, minutes: Int, swipes: Int, intensity: Int) {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager ?: return
+
+        val spm = swipes.toFloat() / max(1, minutes).toFloat()
+        val isDoomscrolling = intensity >= 50 || spm >= 10f
+
+        val appName = when (appId) {
+            "youtube_shorts" -> "YouTube Shorts"
+            "instagram_reels" -> "Instagram Reels"
+            "tiktok" -> "TikTok"
+            "facebook_reels" -> "Facebook Reels"
+            "snapchat_spotlight" -> "Snapchat Spotlight"
+            else -> appId.replace("_", " ").split(" ").joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
+        }
+
+        val title = if (isDoomscrolling) {
+            "⚠️ High Usage: Doomscrolling Detected"
+        } else {
+            "⏱️ High Usage: Extended Watching"
+        }
+
+        val body = if (isDoomscrolling) {
+            "You've swiped $swipes times in ${minutes}m in $appName ($swipes swipes). Rapid scrolling detected—take a mindful pause!"
+        } else {
+            "You've been watching $appName for ${minutes}m ($swipes swipes). Time to take an eye break!"
+        }
+
+
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)?.apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pendingIntent = launchIntent?.let {
+            PendingIntent.getActivity(
+                this,
+                0,
+                it,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        val notification = NotificationCompat.Builder(this, HIGH_USAGE_CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        notificationManager.notify(HIGH_USAGE_NOTIFICATION_ID, notification)
     }
 
     private fun executeActions(actions: List<PenaltyAction>) {
@@ -421,7 +523,7 @@ class ScrollGuardAccessibilityService : AccessibilityService() {
         }
     }
 
-    private fun updateLiveState(inFeed: Boolean, appId: String) {
+    private fun updateLiveState(inFeed: Boolean, appId: String, intensity: Int = 0) {
         val now = System.currentTimeMillis()
         GuardStateHolder.update {
             it.copy(
@@ -433,6 +535,7 @@ class ScrollGuardAccessibilityService : AccessibilityService() {
                 todayFeedSeconds = scoreEngine.getTodayFeedSeconds(),
                 dailyBudgetSeconds = config.dailyBudgetSeconds,
                 budgetFraction = scoreEngine.getBudgetUsedFraction(),
+                intensityScore = intensity,
                 activePenaltyLevel = penaltyState.activeLevel.value,
                 strikesToday = penaltyState.strikesToday,
                 emergencyUnlocksRemaining = (config.maxEmergencyUnlocksPerDay - penaltyState.emergencyUnlocksUsedToday).coerceAtLeast(0),
@@ -441,6 +544,7 @@ class ScrollGuardAccessibilityService : AccessibilityService() {
             )
         }
     }
+
 
     /**
      * Request an emergency unlock.
