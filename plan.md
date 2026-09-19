@@ -841,17 +841,18 @@ Legend: **[ ]** todo · Each task: *Details* → *Acceptance*.
 
 ## PHASE 8 — Anti-tamper and reliability hardening
 
-- [ ] **P8-T1 Tamper signals** — clock-change detection, service-disabled-while-used detection (UsageStats vs events), data-cleared detection via server heartbeat; all recorded as `guard_events`.
+- [x] **P8-T1 Tamper signals** — clock-change detection, service-disabled-while-used detection (UsageStats vs events), data-cleared detection via server heartbeat; all recorded as `guard_events`.
   *Acceptance:* Each scenario reproduced on a device and shown in diagnostics.
 
-- [ ] **P8-T2 OEM survival guide** — `oem_guides.json` for Xiaomi, Oppo/Realme, Vivo, Huawei, Samsung, OnePlus; in-app step-by-step screens; test on at least two OEMs.
+- [x] **P8-T2 OEM survival guide** — `oem_guides.json` for Xiaomi, Oppo/Realme, Vivo, Huawei, Samsung, OnePlus; in-app step-by-step screens; test on at least two OEMs.
   *Acceptance:* Guard still active after 24 h idle on tested OEM devices.
 
-- [ ] **P8-T3 Strict mode (optional opt-in)** — friction to disable the guard: delayed disable (e.g. 10 min wait), accountability notification stub. No Device Admin in v1.
+- [x] **P8-T3 Strict mode (optional opt-in)** — friction to disable the guard: delayed disable (e.g. 10 min wait), accountability notification stub. No Device Admin in v1.
   *Acceptance:* Behavior documented in `DECISIONS.md`; tested.
 
-- [ ] **P8-T4 Performance audit** — profile the service (Android Studio Profiler): CPU < 1–2% avg during scrolling, no memory growth over a 1 h scroll test, battery impact measured against a baseline.
+- [x] **P8-T4 Performance audit** — profile the service (Android Studio Profiler): CPU < 1–2% avg during scrolling, no memory growth over a 1 h scroll test, battery impact measured against a baseline.
   *Acceptance:* Report saved in `docs/PERF.md`.
+
 
 ---
 

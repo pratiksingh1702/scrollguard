@@ -32,6 +32,22 @@
       ]
     },
     {
+      "name": "Vivo / Funtouch OS",
+      "steps": [
+        "Go to Settings > Battery > High background power consumption.",
+        "Toggle ON for ScrollGuard.",
+        "Go to Settings > More settings > Applications > Autostart, and enable ScrollGuard."
+      ]
+    },
+    {
+      "name": "Huawei / EMUI / HarmonyOS",
+      "steps": [
+        "Go to Settings > Apps > App launch.",
+        "Find ScrollGuard and turn OFF 'Manage automatically'.",
+        "Enable 'Auto-launch', 'Secondary launch', and 'Run in background' manually."
+      ]
+    },
+    {
       "name": "Pixel / Stock Android",
       "steps": [
         "Go to Settings > Apps > ScrollGuard > App battery usage.",

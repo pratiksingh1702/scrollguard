@@ -14,7 +14,9 @@ import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.yourorg.scrollguard.R
+import com.yourorg.scrollguard.core.stats.UsageStatsReader
 import com.yourorg.scrollguard.data.AppRoomDatabase
+import com.yourorg.scrollguard.data.ConfigStore
 import com.yourorg.scrollguard.data.entity.GuardEventEntity
 import com.yourorg.scrollguard.service.ScrollGuardAccessibilityService
 import java.util.UUID
@@ -53,7 +55,31 @@ class WatchdogWorker(
         val enabled = isAccessibilityEnabled(context, ScrollGuardAccessibilityService::class.java)
         val db = AppRoomDatabase.getInstance(context)
         val now = System.currentTimeMillis()
+        val nowElapsed = android.os.SystemClock.elapsedRealtime()
 
+        // 1. Clock-tampering detection (P8-T1)
+        val prefs = context.getSharedPreferences("scrollguard_tamper", Context.MODE_PRIVATE)
+        val lastWall = prefs.getLong("last_wall_time", 0L)
+        val lastElapsed = prefs.getLong("last_elapsed_time", 0L)
+
+        if (lastWall > 0L && lastElapsed > 0L && nowElapsed >= lastElapsed) {
+            val elapsedDelta = nowElapsed - lastElapsed
+            val wallDelta = now - lastWall
+            if (wallDelta < -5000L || kotlin.math.abs(wallDelta - elapsedDelta) > 60000L) {
+                Log.w(TAG, "Clock tampering detected: wallDelta=$wallDelta ms, elapsedDelta=$elapsedDelta ms")
+                db.guardEventDao().insertGuardEvent(
+                    GuardEventEntity(
+                        id = UUID.randomUUID().toString(),
+                        ts = now,
+                        type = "clock_tampering",
+                        metaJson = "{\"wallDelta\":$wallDelta,\"elapsedDelta\":$elapsedDelta}"
+                    )
+                )
+            }
+        }
+        prefs.edit().putLong("last_wall_time", now).putLong("last_elapsed_time", nowElapsed).apply()
+
+        // 2. Service-disabled or killed detection (P8-T1)
         if (!enabled) {
             Log.w(TAG, "Watchdog detected AccessibilityService is DISABLED")
             // Record guard_off event
@@ -78,6 +104,33 @@ class WatchdogWorker(
                     metaJson = "{\"reason\":\"oem_service_killed\"}"
                 )
             )
+        }
+
+        // 3. Service-disabled-while-used detection (UsageStats vs Guard events)
+        if (!enabled || !ScrollGuardAccessibilityService.isServiceRunning) {
+            if (UsageStatsReader.hasUsageStatsPermission(context)) {
+                val fifteenMinAgo = now - 15 * 60 * 1000L
+                val config = ConfigStore(context).loadConfig()
+                val foregroundUsage = UsageStatsReader.queryDailyForegroundSeconds(
+                    context,
+                    config.guardedApps.toSet(),
+                    fifteenMinAgo,
+                    now
+                )
+                for ((pkg, fgSecs) in foregroundUsage) {
+                    if (fgSecs > 30L) {
+                        Log.w(TAG, "Guarded app $pkg was used for ${fgSecs}s while guard was inactive!")
+                        db.guardEventDao().insertGuardEvent(
+                            GuardEventEntity(
+                                id = UUID.randomUUID().toString(),
+                                ts = now,
+                                type = "service_disabled_while_used",
+                                metaJson = "{\"appId\":\"$pkg\",\"foregroundSeconds\":$fgSecs}"
+                            )
+                        )
+                    }
+                }
+            }
         }
 
         return Result.success()
