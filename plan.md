@@ -615,15 +615,15 @@ Legend: **[ ]** todo · Each task: *Details* → *Acceptance*.
   *Details:* Add all packages from §2.1. Configure `build.yaml` for freezed/riverpod/drift/json codegen.
   *Acceptance:* `dart run build_runner build` succeeds.
 
-- [ ] **P0-T4 Folder structure and core utilities**
+- [x] **P0-T4 Folder structure and core utilities**
   *Details:* Create the layout in §4. Add `Result<T>`/`AppFailure`, `Logger` wrapper (no sensitive data), `Clock` abstraction (injectable for tests), env config via `--dart-define`.
   *Acceptance:* Structure exists; unit test for `Clock` and `AppFailure` mapping.
 
-- [ ] **P0-T5 Theme, l10n, router skeleton**
+- [x] **P0-T5 Theme, l10n, router skeleton**
   *Details:* Material 3 theme (light/dark), ARB localization (en), go_router with placeholder routes and `routerProvider`.
   *Acceptance:* App shows a placeholder home; theme switch works; widget test passes.
 
-- [ ] **P0-T6 Docs stubs**
+- [x] **P0-T6 Docs stubs**
   *Details:* Create `docs/DECISIONS.md`, `DETECTOR_RULES.md`, `PRIVACY.md`, `PLAY_COMPLIANCE.md`, `QA.md`.
   *Acceptance:* Files exist with headings from this plan.
 

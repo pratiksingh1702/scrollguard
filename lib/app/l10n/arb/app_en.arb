@@ -1,0 +1,39 @@
+{
+  "@@locale": "en",
+  "appTitle": "ScrollGuard",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "dashboardTitle": "Dashboard",
+  "@dashboardTitle": {
+    "description": "Dashboard screen title"
+  },
+  "onboardingTitle": "Welcome to ScrollGuard",
+  "@onboardingTitle": {
+    "description": "Onboarding screen title"
+  },
+  "permissionsTitle": "Permissions",
+  "@permissionsTitle": {
+    "description": "Permissions checklist screen title"
+  },
+  "rulesTitle": "Guard Rules",
+  "@rulesTitle": {
+    "description": "Rules configuration screen title"
+  },
+  "statsTitle": "Screen Stats",
+  "@statsTitle": {
+    "description": "Stats and analytics screen title"
+  },
+  "penaltiesTitle": "Penalty Log",
+  "@penaltiesTitle": {
+    "description": "Penalties history screen title"
+  },
+  "contractTitle": "Commitment Contract",
+  "@contractTitle": {
+    "description": "Contract screen title"
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Settings screen title"
+  }
+}
